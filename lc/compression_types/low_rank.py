@@ -75,7 +75,7 @@ class LowRank(CompressionTypeBase):
         return u,s,v
 
     def compress(self, data):
-        print("we are here")
+        print("we are here Low rank compress")
         matrix = None
         init_shape = data.shape
         if data.ndim == 2:

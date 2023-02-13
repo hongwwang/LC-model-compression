@@ -135,8 +135,8 @@ def compute_acc_loss(forward_func, data_loader):
     correct_cnt, ave_loss = 0, 0
     for batch_idx, (x, target) in enumerate(data_loader):
         with torch.no_grad():
-            target = target.cuda()
-            score, loss = forward_func(x.cuda(), target)
+            #target = target.cuda()
+            score, loss = forward_func(x, target)
             _, pred_label = torch.max(score.data, 1)
             correct_cnt += (pred_label == target.data).sum().item()
             ave_loss += loss.data.item() * len(x)

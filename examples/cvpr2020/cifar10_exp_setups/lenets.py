@@ -1,13 +1,13 @@
 from lc.models.torch.lenet5 import lenet5_drop
 from lc.models.torch.lenet300 import lenet300_classic
-from lc_for_rank_selection_cvpr2020.utils import AverageMeter, Recorder, format_time, data_loader, compute_acc_loss
+from ..utils import AverageMeter, Recorder, format_time, data_loader, compute_acc_loss
 import torch
 import time
 from lc.torch import ParameterTorch as LCParameterTorch, AsIs
 from torch import nn
 from lc.compression_types.low_rank import RankSelection
-from lc_for_rank_selection_cvpr2020.utils import add_flops_counting_methods
-from lc_for_rank_selection_cvpr2020.new_finetune import reparametrize_low_rank
+from ..utils import add_flops_counting_methods
+from ..new_finetune import reparametrize_low_rank
 from lc.models.torch.utils import count_params
 
 

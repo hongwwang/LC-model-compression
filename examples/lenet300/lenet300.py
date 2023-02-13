@@ -1,12 +1,12 @@
 import lc
 from lc.torch import ParameterTorch as Param, AsVector, AsIs
 from lc.compression_types import ConstraintL0Pruning, LowRank, RankSelection, AdaptiveQuantization
-from lc.models.torch import lenet300_classic
-from utils import compute_acc_loss
+from lc.models.torch import lenet300_classic,lenet300_modern
+from .utils import compute_acc_loss
 
 import argparse
 import gzip
-import pickle
+import pickle,io
 import numpy as np
 
 import torch
@@ -14,6 +14,12 @@ from torch import nn, optim
 from torch.utils.data import TensorDataset, DataLoader
 from torchvision import datasets
 
+# def load_reference_lenet300():
+#     net = lenet300_modern().to(device)
+#     state_dict = torch.utils.model_zoo.load_url('https://ucmerced.box.com/shared/static/766axnc8qq429hiqqyqqo07ek46oqoxq.th')
+
+#     net.load_state_dict(state_dict)
+#     net.to(device)
 
 def data_loader(batch_size=256, n_workers=4):
     train_data_th = datasets.MNIST(root='./datasets', download=True, train=True)
@@ -39,16 +45,17 @@ def train_reference():
     pass
 
 def main(exp_name="pruning"):
-    device = torch.device('cuda')
-    net = lenet300_classic().to(device)
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    net = lenet300_modern().to(device)
+    state_dict = torch.utils.model_zoo.load_url('https://ucmerced.box.com/shared/static/766axnc8qq429hiqqyqqo07ek46oqoxq.th')
 
     # loading the parameters of pre-trained lenet300
-    try:
-        with gzip.open('lenet300_classic.pklz', 'rb') as ff:
-            state_dict = pickle.load(ff)
-    except FileNotFoundError:
-        # trained reference is missing
-        state_dict = train_reference()
+    # try:
+    #     with gzip.open('lenet300_classic.pklz', 'rb') as ff:
+    #         state_dict = pickle.load(ff)
+    # except FileNotFoundError:
+    #     # trained reference is missing
+    #     state_dict = train_reference()
 
     net.load_state_dict(state_dict)
     train_loader, test_loader = data_loader(256)
@@ -150,7 +157,7 @@ def main(exp_name="pruning"):
                 (AsVector, AdaptiveQuantization(k=2), 'quant')
             ]
         }
-        mu_s = [9e-5 * (1.1 ** n) for n in range(40)]
+        mu_s = [9e-5 * (1.1 ** n) for n in range(10)]
         lr_base = 0.09
 
     def train_test_acc_eval_f(model):

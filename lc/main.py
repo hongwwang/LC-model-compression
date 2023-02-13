@@ -100,7 +100,8 @@ class Algorithm():
         parameters associated with the task, reshapes them according to compression view and compresses them. The result
         of compression will be put into param.delta_theta
         """
-
+        # import pdb
+        # pdb.set_trace()
         for param, task_details in self.compression_tasks.items():
             if isinstance(task_details, tuple):
                 view, compression, _name = task_details
