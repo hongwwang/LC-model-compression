@@ -139,6 +139,7 @@ def compute_acc_loss(forward_func, data_loader):
         with torch.no_grad():
             target = target[0] if type(target) == list else target
             score, loss = forward_func(x, target)
+            target = target.to(loss.device)
             _, pred_label = torch.max(score.data, 1)
             correct_cnt += (pred_label == target.data).sum().item()
             ave_loss += loss.data.item() * len(x)

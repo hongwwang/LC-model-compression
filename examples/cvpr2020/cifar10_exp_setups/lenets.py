@@ -356,6 +356,7 @@ class lenet_all_normalized():
         pen = lc_penalty()
 
         def my_forward_lc_eval(x, target):
+          x,target = x.to(self.device), target.to(self.device)
           out_ = model.forward(x)
           return out_, model.loss(out_, target) + pen
 
@@ -436,6 +437,7 @@ class lenet_all_normalized():
 
     def evaluation(model):
       def my_forward_eval(x, target):
+        x,target = x.to(self.device), target.to(self.device)
         out_ = model.forward(x)
         return out_, model.loss(out_, target)
 

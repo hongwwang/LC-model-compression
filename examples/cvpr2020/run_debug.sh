@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
+pwd
+cd examples/cvpr2020
+pwd
 mkdir -p results
-
 # Reference Network training
 # python -u reference_trainer.py --arch lenet300_classic \
 #         --batch-size 256 \
@@ -42,10 +44,9 @@ do
     lr_decay=0.99
     # once compression is finished, we decompose the networks and then fine-tune
     logfile="results/${exp_setup_name}_ft_${tag}.log"
-    python -u exp_runner.py \
-            --exp_setup ${exp_setup_name} --type ${type} --tag ${tag} \
-            --lr ${lr}  --lr_decay ${lr_decay} --epochs ${ft_epochs} --momentum ${momentum} \
-            | tee -a ${logfile}
-
+#     python -u exp_runner.py \
+#             --exp_setup ${exp_setup_name} --type ${type} --tag ${tag} \
+#             --lr ${lr}  --lr_decay ${lr_decay} --epochs ${ft_epochs} --momentum ${momentum} \
+#             | tee -a ${logfile}
 
 done

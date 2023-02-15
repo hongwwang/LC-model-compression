@@ -43,6 +43,7 @@ class torch_alexnet:
         pen = lc_penalty()
 
         def my_forward_lc_eval(x, target):
+          x,target = x.to(self.device),target.to(self.device)
           out_ = model.forward(x)
           return out_, model.loss(out_, target) + pen
 
@@ -124,6 +125,7 @@ class torch_alexnet:
 
     def evaluation(model):
       def my_forward_eval(x, target):
+        x,target = x.to(self.device),target.to(self.device)
         out_ = model.forward(x)
         return out_, model.loss(out_, target)
 
@@ -223,6 +225,7 @@ class torch_alexnet:
     print("Low rank layers of the model has been successfully reparameterized with sequence of full-rank matrices.")
 
     def my_forward_eval(x, target):
+      x,target = x.to(self.device),target.to(self.device)
       out_ = self.model.forward(x)
       return out_, self.model.loss(out_, target)
 
