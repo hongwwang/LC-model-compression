@@ -1,13 +1,13 @@
 from lc.models.torch.lenet5 import lenet5_drop
 from lc.models.torch.lenet300 import lenet300_classic
-from ..utils import AverageMeter, Recorder, format_time, data_loader, compute_acc_loss
+from utils import AverageMeter, Recorder, format_time, data_loader, compute_acc_loss
 import torch
 import time
 from lc.torch import ParameterTorch as LCParameterTorch, AsIs
 from torch import nn
 from lc.compression_types.low_rank import RankSelection
-from ..utils import add_flops_counting_methods
-from ..new_finetune import reparametrize_low_rank
+from utils import add_flops_counting_methods
+from new_finetune import reparametrize_low_rank
 from lc.models.torch.utils import count_params
 
 
@@ -16,7 +16,7 @@ __all__ = ['lenet300_all', 'lenet5_all']
 
 class lenet_all():
   def __init__(self, name, model, stored_ref):
-    self.device = torch.device('cuda')
+    self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     self.name = name
     self.model = model.to(self.device)
     self.train_loader, self.test_loader = data_loader(batch_size=256, n_workers=4, dataset="MNIST")
@@ -80,7 +80,7 @@ class lenet_all():
         avg_loss_ = AverageMeter()
         for x, target in self.train_loader:
           optimizer.zero_grad()
-          x, target = x.cuda(), target.cuda(non_blocking=True)
+          x, target = x.to(self.device), target.to(self.device,non_blocking=True)
           loss = model.loss(model(x), target) + lc_penalty()
           avg_loss_.update(loss.item())
           loss.backward()
@@ -147,7 +147,7 @@ class lenet_all():
         model.start_flops_count()
 
         for x, target in self.train_loader:
-          _ = model(x[None, 0].cuda())
+          _ = model(x[None, 0].to(self.device))
           break
         uncompressed_flops = model.compute_average_flops_cost()
         print('The number of FLOPS in this model', uncompressed_flops)
@@ -175,7 +175,7 @@ class lenet_all():
     model.start_flops_count()
 
     for x, target in self.train_loader:
-      _ = model(x[None, 0].cuda())
+      _ = model(x[None, 0].to(self.device))
       break
     all_flops = model.compute_average_flops_cost()
     model.stop_flops_count()
@@ -229,7 +229,7 @@ class lenet_all():
     model.start_flops_count()
 
     for x, target in self.train_loader:
-      _ = model(x[None, 0].cuda())
+      _ = model(x[None, 0].to(self.device))
       break
     compressed_flops = model.compute_average_flops_cost()
     model.stop_flops_count()
@@ -274,7 +274,7 @@ class lenet_all():
         avg_loss_ = AverageMeter()
         for x, target in self.train_loader:
           optimizer.zero_grad()
-          x, target = x.cuda(), target.cuda()
+          x, target = x.to(self.device), target.to(self.device)
           loss = self.model.loss(self.model(x), target)
           loss.backward()
           avg_loss_.update(loss.item())
@@ -332,7 +332,7 @@ class lenet300_all(lenet_all):
 
 class lenet_all_normalized():
   def __init__(self, name, model, stored_ref):
-    self.device = torch.device('cuda')
+    self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     self.name = name
     self.model = model.to(self.device)
     self.train_loader, self.test_loader = data_loader(batch_size=256, n_workers=4, dataset="MNIST")
@@ -396,7 +396,7 @@ class lenet_all_normalized():
         avg_loss_ = AverageMeter()
         for x, target in self.train_loader:
           optimizer.zero_grad()
-          x, target = x.cuda(), target.cuda(non_blocking=True)
+          x, target = x.to(self.device), target.to(self.device,non_blocking=True)
           loss = model.loss(model(x), target) + lc_penalty()
           avg_loss_.update(loss.item())
           loss.backward()
@@ -463,7 +463,7 @@ class lenet_all_normalized():
         model.start_flops_count()
 
         for x, target in self.train_loader:
-          _ = model(x[None, 0].cuda())
+          _ = model(x[None, 0].to(self.device))
           break
         uncompressed_flops = model.compute_average_flops_cost()
         print('The number of FLOPS in this model', uncompressed_flops)
@@ -491,7 +491,7 @@ class lenet_all_normalized():
     model.start_flops_count()
 
     for x, target in self.train_loader:
-      _ = model(x[None, 0].cuda())
+      _ = model(x[None, 0].to(self.device))
       break
     all_flops = model.compute_average_flops_cost()
     model.stop_flops_count()
@@ -545,7 +545,7 @@ class lenet_all_normalized():
     model.start_flops_count()
 
     for x, target in self.train_loader:
-      _ = model(x[None, 0].cuda())
+      _ = model(x[None, 0].to(self.device))
       break
     compressed_flops = model.compute_average_flops_cost()
     model.stop_flops_count()
@@ -590,7 +590,7 @@ class lenet_all_normalized():
         avg_loss_ = AverageMeter()
         for x, target in self.train_loader:
           optimizer.zero_grad()
-          x, target = x.cuda(), target.cuda()
+          x, target = x.to(self.device), target.to(self.device)
           loss = self.model.loss(self.model(x), target)
           loss.backward()
           avg_loss_.update(loss.item())

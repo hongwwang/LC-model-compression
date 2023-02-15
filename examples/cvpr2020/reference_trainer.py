@@ -44,9 +44,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
     print(args)
     cudnn.benchmark = True
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     model = getattr(model_def, args.arch)()
 
-    model.cuda()
+    model.to(device)
     train_loader, test_loader = data_loader(batch_size=args.batch_size,
                                             n_workers=args.workers,
                                             dataset=args.dataset)
@@ -80,6 +81,7 @@ if __name__ == '__main__':
         scheduler = optim.lr_scheduler.MultiStepLR(optimizer, args.milestones, gamma=args.lr_decay, last_epoch=start_epoch-1)
 
     def my_eval(x, target):
+        x,target = x.to(device),target.to(device)
         out_ = model.forward(x)
         return out_, model.loss(out_, target)
 
@@ -89,7 +91,7 @@ if __name__ == '__main__':
         model.train()
         for batch_idx, (x, target) in enumerate(train_loader):
             optimizer.zero_grad()
-            x, target = x.cuda(), target.cuda()
+            x, target = x.to(device), target.to(device)
             out = model.forward(x)
             loss = model.loss(out, target)
             loss.backward()
