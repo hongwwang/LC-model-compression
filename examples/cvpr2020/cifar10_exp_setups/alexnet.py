@@ -12,7 +12,7 @@ from torchvision.models import alexnet, AlexNet_Weights
 from _imagenet import get_ImageNet
 
 __all__ = ['torch_alexnet']
-import pdb
+
 class torch_alexnet:
   def __init__(self):
     self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -160,7 +160,8 @@ class torch_alexnet:
 
       compression_tasks = {}
       for i, (w_get, module) in enumerate(
-          [((lambda x=x: getattr(x, 'weight')), x) for x in self.model.modules() if isinstance(x, nn.Conv2d)]):
+          [((lambda x=x: getattr(x, 'weight')), x) for x in self.model.modules() 
+          if isinstance(x, nn.Conv2d) or isinstance(x, nn.Linear)]):
         compression_tasks[LCParameterTorch(w_get, self.device)] \
           = (AsIs,
              RankSelection(conv_scheme=config_['conv_scheme'], alpha=config_["alpha"], criterion=config_["criterion"],

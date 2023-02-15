@@ -5,11 +5,9 @@ import torch
 from torch.utils.data import DataLoader, Dataset, random_split
 import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder
-
 from PIL import Image
-
 from _augs import get_imagenet_transform
-
+import pandas as pd
 
 try:
     import boto3
@@ -51,12 +49,20 @@ try:
             self._s3._request_signer.sign = (lambda *args, **kwargs: None)
 
             self._transform = transform
+            map_cls_path = './map_clsloc.txt'
+            cls_map = pd.read_csv(map_cls_path, sep=' ', header=None)
+            cls_map.columns = ['clz','label','name']
+            cls_map['label'] = cls_map['label'] -1
+            cls_map.set_index('clz',inplace=True)
+            self.cls_map = cls_map
 
         def __getitem__(self, index):
             if self._remove_endpoint:
                 fn = '/'.join(self._s3_urls[index].split('/')[4:])
             else:
                 fn = self._s3_urls[index]
+            clz = fn.split('/')[1]
+            label = self.cls_map.loc[clz]['label'].item()
 
             im_bytes = self._s3.get_object(Bucket=self._bucket_name, Key=fn)['Body'].read()
             im_s3 = Image.open(BytesIO(im_bytes))
@@ -67,7 +73,7 @@ try:
             if self._transform is not None:
                 im = self._transform(im)
 
-            return im, [0]
+            return im, label
 
         def __len__(self):
             return len(self._s3_urls)

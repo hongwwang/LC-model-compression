@@ -11,6 +11,7 @@ mkdir -p results
 # Our compression
 for alpha in 0.25 #0.50 0.75 1 2 3 4
 do
+    #exp_setup_name=lenet300_all
     exp_setup_name=torch_alexnet
     alpha_exp="e-6"
     criterion="flops"
@@ -42,10 +43,10 @@ do
     lr_decay=0.99
     # once compression is finished, we decompose the networks and then fine-tune
     logfile="results/${exp_setup_name}_ft_${tag}.log"
-    python -u exp_runner.py \
-            --exp_setup ${exp_setup_name} --type ${type} --tag ${tag} \
-            --lr ${lr}  --lr_decay ${lr_decay} --epochs ${ft_epochs} --momentum ${momentum} \
-            | tee -a ${logfile}
+#     python -u exp_runner.py \
+#             --exp_setup ${exp_setup_name} --type ${type} --tag ${tag} \
+#             --lr ${lr}  --lr_decay ${lr_decay} --epochs ${ft_epochs} --momentum ${momentum} \
+#             | tee -a ${logfile}
 
 
 done
