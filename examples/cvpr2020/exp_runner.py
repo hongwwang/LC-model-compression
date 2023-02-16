@@ -31,9 +31,9 @@ def ft_exp_runner(exp_setup, ft_config, c_step_config):
     finetuning_func(ft_config)
 
 if __name__ == "__main__":
-    if not os.path.exists('references'):
-        raise Exception("You don't have any trained reference networks to compress. "
-                        "Please use `reference_trainer.py' to train a reference model.")
+    # if not os.path.exists('references'):
+    #     raise Exception("You don't have any trained reference networks to compress. "
+    #                     "Please use `reference_trainer.py' to train a reference model.")
 
     parser = argparse.ArgumentParser(description='PyTorch LC RankSelection Training')
 
