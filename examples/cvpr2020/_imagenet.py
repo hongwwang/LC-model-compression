@@ -7,7 +7,8 @@ import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder
 from PIL import Image
 from _augs import get_imagenet_transform
-import pandas as pd
+from pathlib import Path
+import json
 
 try:
     import boto3
@@ -17,6 +18,8 @@ try:
 
     class ImageS3(Dataset):
         def __init__(self, root, transform=None, endpoint=None, bucket_name=None):
+            with open(Path(__file__).parent / 'imagenet_classes.json', 'r') as fp:
+                self._imagenet_classes = json.load(fp)
 
             if isinstance(root, list):
                 self._s3_urls = root
@@ -49,20 +52,14 @@ try:
             self._s3._request_signer.sign = (lambda *args, **kwargs: None)
 
             self._transform = transform
-            map_cls_path = './map_clsloc.txt'
-            cls_map = pd.read_csv(map_cls_path, sep=' ', header=None)
-            cls_map.columns = ['clz','label','name']
-            cls_map['label'] = cls_map['label'] -1
-            cls_map.set_index('clz',inplace=True)
-            self.cls_map = cls_map
+
+
 
         def __getitem__(self, index):
             if self._remove_endpoint:
                 fn = '/'.join(self._s3_urls[index].split('/')[4:])
             else:
                 fn = self._s3_urls[index]
-            clz = fn.split('/')[1]
-            label = self.cls_map.loc[clz]['label'].item()
 
             im_bytes = self._s3.get_object(Bucket=self._bucket_name, Key=fn)['Body'].read()
             im_s3 = Image.open(BytesIO(im_bytes))
@@ -70,10 +67,13 @@ try:
             # Copy and close the connection with the original image in the cloud bucket. Additionally, convert any grayscale image to RGB (replicate it to have three channels)
             im = im_s3.copy().convert('RGB')
             im_s3.close()
+
             if self._transform is not None:
                 im = self._transform(im)
 
-            return im, label
+            target = self._imagenet_classes[fn.split("/")[-2]]
+
+            return im, target
 
         def __len__(self):
             return len(self._s3_urls)
